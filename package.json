@@ -1,0 +1,15 @@
+{
+  "name": "todoly",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "node node_modules/.bin/jasmine-node specs/*Spec.js --verbose"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "jasmine-node": "^1.14.5",
+    "superagent": "^3.5.2"
+  }
+}
