@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "node_modules/.bin/jasmine-node specs/ --verbose"
+    "test:bu": "node_modules/.bin/jasmine-node specs/mailgun/ --verbose"
   },
   "author": "",
   "license": "ISC",

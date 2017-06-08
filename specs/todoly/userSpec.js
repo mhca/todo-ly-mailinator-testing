@@ -4,7 +4,6 @@ var faker = require('faker');
 describe('User service', function(){
 	it('should send a verification e-mail after creating a new user', function(done){
 		
-		// key-19adde4e958690474cde8b010e365989
 		// var emailName = 'sk-test-' + Date.now();
 		var emailName = faker.name.findName().replace(/\s/, '.'); // Jhon Smith
 		console.log('Faker email address:', emailName);
