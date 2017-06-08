@@ -9,7 +9,9 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "faker": "^4.1.0",
     "jasmine-node": "^1.14.5",
+    "mailgun-js": "^0.11.2",
     "superagent": "^3.5.2"
   }
 }

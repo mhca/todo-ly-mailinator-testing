@@ -1,165 +1,93 @@
 var request = require('superagent');
+var faker = require('faker');
 
-describe('User service', function() {
-
-	xit('should send a verification e-mail after creating a new user', function(done){
-
-	    /*  	
-	    steps:
-		    send request to create user
-		    get to mailinator inbox
-		    search a todoly e-mail
-		    get todoly e-mail using id
-
-	    verifications/expect
-		    verify that e-mail subject is "Welcome to Todo.ly!"
-		    verify that todoly e-mail contains "Your account has been created"
-	    */
-		//////////
+describe('User service', function(){
+	it('should send a verification e-mail after creating a new user', function(done){
+		
+		// key-19adde4e958690474cde8b010e365989
+		// var emailName = 'sk-test-' + Date.now();
+		var emailName = faker.name.findName().replace(/\s/, '.'); // Jhon Smith
+		console.log('Faker email address:', emailName);
+		
+		/*****************************************/
+		/*** Create new Todo.ly user           ***/
+		/*****************************************/
 		request
 		.post('https://todo.ly/api/user.json')
-		.send({
-				Email: 'sk-test000@mailinator.com',
+		.send(
+		{
+				Email: emailName + '@mailinator.com',
 				FullName: 'myfullname',
 				Password:'pass'
-			})
+			}
+		)
 		.set('Accept', 'application/json')
 		.end(function(err, res){
 			if(err){
 				return done(err);
 			}
-			//console.log(err);
-			//console.log(res);
 			
-			if(inbox.messages[i].subject == todolySubject){
-			emailId = inbox.messages[i].id;
-			console.log('----------');
-			console.log(emailId);
-			var inboxListRequest = 'https://www.mailinator.com/fetch_inbox?x=2&zone=public&to='+'emailId;
+			console.log('*** User Created: ', res.body);
 			
+			/*****************************************/
+			/*** Get Mailiniator inbox from user   ***/
+			/*****************************************/
 			request
-            .get(inboxListRequest)
-            .end(function(err, res){
-                if (err) {
-                    return done(err);
-                }
-                var inbox = res.body;
-				console.log(inbox);
-				var todolySubject = 'Welcome to Todo.ly!';
-				var isTodolyEmailAvailable = 0;
-				var emailId = null;
-		
-			}
-		
-		//////////
-        
-        request
-            .get(inboxListRequest)
-            .end(function(err, res){
-                if (err) {
-                    return done(err);
-                }
-                var inbox = res.body;
-				console.log(inbox);
-				var todolySubject = 'Welcome to Todo.ly!';
-				var isTodolyEmailAvailable = 0;
-				var emailId = null;
-							//	console.log(todolySubject);
-
+            .get('https://www.mailinator.com/fetch_inbox?zone=public&to=' + emailName)
+			.end(function(err, res){
 				
-                for(var i = 0; i < inbox.messages.length; i++){
-                  
-					console.log(inbox.messages[i].subject);
-					//console.log(inbox.messages[i].id);
-
-                }
-
-                done();
-
-            });
-
-	});
-	
-	xit('should get todoly e-mail', function(done){
-		request
-		.get('https://www.mailinator.com/fetch_email?msgid=1496867094-20005454684-sk-test00&zone=public')
-		.end(function(err, res){
-			if(err){
-				return done(err);
-			}
-			var email = res.body;
-			console.log('emailllllllllllll');
-			console.log(email);
-			console.log('============== subject    ====');
-			console.log(email.data.subject);
-			console.log('============== parts   ====');
-			console.log(email.data.parts[0].body);
-			done();
-		});
-		
-	});
-	
-	it('should create a new user', function(done){
-		request
-		.post('https://todo.ly/api/user.json')
-		.send({
-				Email: 'sk-test03@mailinator.com',
-				FullName: 'myfullname',
-				Password:'pass'
-			})
-		.set('Accept', 'application/json')
-		.end(function(err, res){
-			if(err){
-				return done(err);
-			}
-			//console.log(err);
-			console.log(res);
-			
-			if(inbox.messages[i].subject == todolySubject){
-			emailId = inbox.messages[i].id;
-			console.log('----------');
-			console.log(emailId);
-			}
-			
-	xit('should send a verification e-mail after creating a new user', function(done){
-
-	         
-        request
-            .get('https://www.mailinator.com/fetch_inbox?x=2&to=sk-test00&zone=public')
-            .end(function(err, res){
-                if (err) {
+				if (err) {
                     return done(err);
                 }
-                var inbox = res.body;
-				console.log(inbox);
-				var todolySubject = 'Welcome to Todo.ly!';
-				var isTodolyEmailAvailable = 0;
-				var emailId = null;
-							//	console.log(todolySubject);
-
 				
-                for(var i = 0; i < inbox.messages.length; i++){
-                  
-					console.log(inbox.messages[i].subject);
-					//console.log(inbox.messages[i].id);
-
-                }
-
-                done();
-
-            });
-
-	});
+                var inbox = res.body;				
+				console.log('*** User\'s inbox: ', inbox);
+				var expectedSubject = 'Welcome to Todo.ly!';
+				
+				/******************************************************/
+				/*** Search Todo.ly welcome email in user's inbox   ***/
+				/******************************************************/
+				var email = null;
+				for (var i = 0; i < inbox.messages.length; i++) {
+					 
+					var message = inbox.messages[i];
+					console.log('****** Message subject:', message.subject);
+					console.log('****** Message id: ', message.id);
+					
+					if (message.subject == expectedSubject){
+						email = message;
+						break;
+					}
+				}
+				
+				if (email === null) {
+					return done('Welcome Todo.ly email was not found in user\'s inbox.');
+				}
+				
+				/*****************************************/
+				/*** Get welocme Todo.ly email         ***/
+				/*****************************************/
+				request
+				.get('https://www.mailinator.com/fetch_email?msgid='+  email.id + '&zone=public')
+				.end(function(err, res){
+					if (err) {
+						return done(err);
+					}
+					
+					var welcomeEmail = res.body;
+					console.log('*** E-mail subject:', welcomeEmail.data.subject);
+					// console.log('E-mail body:', welcomeEmail.data.parts[0].body);
+					
+					/*****************************************/
+					/*** Expectations/validations          ***/
+					/*****************************************/
+					expect(welcomeEmail.data.subject).toEqual(expectedSubject);
+					expect(welcomeEmail.data.parts[0].body).toContain('Your account has been crea');
+					expect(welcomeEmail.data.parts[0].body).toContain(emailName);
+					done();							
+				});
+			});
 			
-			
-			}
-
-			
-			
-			done();
 		});
 	});
 });
-
-
-
